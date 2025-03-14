@@ -37,6 +37,8 @@ jobs:
         echo "okta.oauth2.client-id=${{ secrets.OKTA_OAUTH2_CLIENT_ID }}" >> src/main/resources/application-dev.properties
         echo "okta.oauth2.client-secret=${{ secrets.OKTA_OAUTH2_CLIENT_SECRET }}" >> src/main/resources/application-dev.properties
         echo "okta.oauth2.audience=${{ secrets.OKTA_OAUTH2_AUDIENCE }}" >> src/main/resources/application-dev.properties    
+        echo "ui.base.url=${{ secrets.UI_BASE_URL }}" >> src/main/resources/application-dev.properties    
+        echo "auth.callback.url=${{ secrets.AUTH_CALLBACK_URL }}" >> src/main/resources/application-dev.properties    
 
     - name: Build with Maven
       run: mvn -B package --file pom.xml
