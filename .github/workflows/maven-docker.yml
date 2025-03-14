@@ -49,7 +49,7 @@ jobs:
 
     - name: Build and push Docker image
       run: |
-        IMAGE_TAG=my-image-name:$(date +%s)
+        IMAGE_TAG=suvraneel/vishnu:$(date +%s)
         docker build . --file Dockerfile --tag $IMAGE_TAG
         docker push $IMAGE_TAG
 
