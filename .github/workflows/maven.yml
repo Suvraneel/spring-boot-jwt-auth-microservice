@@ -27,6 +27,17 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
+
+    - name: Create application-dev.properties file
+      run: |
+        echo "spring.datasource.url=${{ secrets.SPRING_DATASOURCE_URL }}" >> src/main/resources/application-dev.properties
+        echo "spring.datasource.username=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> src/main/resources/application-dev.properties
+        echo "spring.datasource.password=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> src/main/resources/application-dev.properties
+        echo "okta.oauth2.issuer=${{ secrets.OKTA_OAUTH2_ISSUER }}" >> src/main/resources/application-dev.properties
+        echo "okta.oauth2.client-id=${{ secrets.OKTA_OAUTH2_CLIENT_ID }}" >> src/main/resources/application-dev.properties
+        echo "okta.oauth2.client-secret=${{ secrets.OKTA_OAUTH2_CLIENT_SECRET }}" >> src/main/resources/application-dev.properties
+        echo "okta.oauth2.audience=${{ secrets.OKTA_OAUTH2_AUDIENCE }}" >> src/main/resources/application-dev.properties    
+
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 
