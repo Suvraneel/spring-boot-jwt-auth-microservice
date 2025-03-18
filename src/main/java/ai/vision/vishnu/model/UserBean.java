@@ -1,7 +1,6 @@
 package ai.vision.vishnu.model;
 
 import ai.vision.vishnu.entity.User;
-import ai.vision.vishnu.enums.Role;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
