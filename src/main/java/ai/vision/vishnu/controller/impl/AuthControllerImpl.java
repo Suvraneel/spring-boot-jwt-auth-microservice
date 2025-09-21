@@ -2,9 +2,9 @@ package ai.vision.vishnu.controller.impl;
 
 import ai.vision.vishnu.controller.AuthController;
 import ai.vision.vishnu.entity.User;
+import ai.vision.vishnu.jwt.JwtUtil;
 import ai.vision.vishnu.model.UserBean;
 import ai.vision.vishnu.service.UserService;
-import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
@@ -23,15 +25,9 @@ import java.util.Objects;
 public class AuthControllerImpl implements AuthController {
     @Autowired
     private UserService userService;
-//    @GetMapping("/me")
-//    public UserBean whoAmI(@AuthenticationPrincipal OidcUser oidcUser) {
-//        log.info("Getting user info");
-//        UserBean userBean = new UserBean();
-//        userBean.setEmail(oidcUser.getEmail());
-//        userBean.setName(oidcUser.getFullName());
-//        userBean.setPicture(oidcUser.getPicture());
-//        return userBean;
-//    }
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @PostMapping("/register")
     @Override
@@ -47,19 +43,17 @@ public class AuthControllerImpl implements AuthController {
     }
 
     @PostMapping("/login")
-    @Override
-    public ResponseEntity<UserBean> login(@RequestBody UserBean userBean, HttpSession session) {
+    public ResponseEntity<?> login(@RequestBody UserBean userBean) {
         log.info("Attempting to login user: {}", userBean);
         boolean isAuthenticated = userService.authenticateUser(userBean.getEmail(), userBean.getUsername(), userBean.getPassword());
         if (isAuthenticated) {
             User authenticatedUser = userService.getUser(userBean.getEmail());
-            session.setAttribute("uid", authenticatedUser.getId());
-            session.setAttribute("username", authenticatedUser.getUsername());
+            String token = jwtUtil.generateToken(authenticatedUser);
             log.info("User {} logged in successfully!", authenticatedUser.getUsername());
-            return ResponseEntity.ok(UserBean.from(authenticatedUser));
+            return ResponseEntity.ok(Map.of("token", token, "user", UserBean.from(authenticatedUser)));
         }
         log.error("Invalid Username or Password! {}", userBean);
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new UserBean());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Username or Password!");
     }
 
 }
