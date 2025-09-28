@@ -33,4 +33,5 @@ build/
 .vscode/
 
 # Local secrets/configs
+.env
 /src/main/resources/application-dev.properties
