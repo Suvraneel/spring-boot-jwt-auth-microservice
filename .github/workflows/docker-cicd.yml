@@ -1,0 +1,54 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Docker Build and Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Create .env file
+      run: |
+        echo "# Database config" > .env
+        echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+        echo "POSTGRES_DB=\${DB_NAME}" >> .env
+        echo "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" >> .env
+        echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> .env
+        echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> .env
+        echo "" >> .env
+        echo "# Spring settings" >> .env
+        echo "SPRING_PROFILES_ACTIVE=prod" >> .env
+        echo "" >> .env
+        echo "# App config" >> .env
+        echo "UI_BASE_URL=${{ secrets.UI_BASE_URL }}" >> .env
+        echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+    
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and push Docker image
+      run: |
+        IMAGE_TAG=suvraneel/vishnu:latest
+        docker build . --file Dockerfile --tag $IMAGE_TAG
+        docker push $IMAGE_TAG
+
+    - name: Deploy to Render
+      run: curl -X GET ${{ secrets.RENDER_DEPLOY_HOOK }}
